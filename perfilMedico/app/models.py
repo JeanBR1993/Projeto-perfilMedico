@@ -85,9 +85,6 @@ class Paciente(models.Model):
         blank = False
     )
 
-    #É muitíssimo difícil fazer validação e conversão de datas no formato DD/MM/YYYY para
-    #formato YYYY/MM/DD nativo da base de dados aqui no próprio atributo do objeto
-    #recomendo que isso seja feito antes de passar para a base (input) e depois da retirada dela (view).
     dataNascimento = models.DateField(
         blank=False,
         validators=[validadorDataNascimento],
@@ -114,4 +111,4 @@ class Paciente(models.Model):
 
 
     def __str__(self):
-        return self.nome + " - " + "CPF: " + self.cpf + " - " + "número SUS: " + self.numeroSUS
+        return self.nome + " - " + "CPF: " + str(self.cpf) + " - " + "número SUS: " + str(self.numeroSUS)
