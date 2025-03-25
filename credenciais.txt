@@ -1,0 +1,14 @@
+Comando de acesso postgres Admin
+psql -U postgres
+senha postgres
+Bolodecenoura01!
+
+credenciais usuario django
+'databse': 'perfilmedico_db",
+'USER': 'django_user',
+'PASSWORD': 'Bolodecenoura01!'
+
+
+credenciais admin django
+'user' : 'administrator'
+'pass' : 'grupoPI'
