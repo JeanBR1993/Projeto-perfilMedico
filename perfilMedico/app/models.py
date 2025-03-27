@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import RegexValidator, MinLengthValidator, MinValueValidator, MaxValueValidator
+from django.core.validators import RegexValidator, MinLengthValidator, MinValueValidator, MaxValueValidator, FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -128,29 +128,41 @@ class Paciente(models.Model):
 # classes de implementação dos arquivos de documento médico,
 # falta a tomada de decisão por qual serviço de hospedagem,
 # se Amazon S3, Microsoft Azure e etc...
-class PrivateMedicalStorage():
+"""class PrivateMedicalStorage():
     location = 'private'
     default_acl = 'private'
     file_overwrite = False
-    custom_domain = False
+    custom_domain = False"""
 
+# tem bastante coisa pra fazer e melhorar nesse objeto
 class documentoMedico(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name="documentos")
-    arquivo = models.FileField(storage=PrivateMedicalStorage())
+    arquivo = models.FileField(
+        upload_to='uploads/',
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "jpeg"])],
+        help_text="Aceita apenas PDF e JPEG"
+    )
     descrição = models.CharField(max_length=255)
     data_upload = models.DateTimeField(auto_now_add=True)
     tipo_arquivo = models.CharField(max_length=10)  # 'pdf', 'jpeg', etc.
-    tamanho_arquivo = models.PositiveIntegerField()  # in bytes
     
     # Additional medical metadata
-    document_type = models.CharField(max_length=50)  # 'xray', 'lab_report', etc.
-    clinician_notes = models.TextField(blank=True)
+    tipoDocumento = models.CharField(max_length=50, verbose_name="Tipo de documento", blank=True, null=True)  # 'xray', 'lab_report', etc.
+    anotacaoMedico = models.TextField(blank=True, verbose_name="Anotação do Médico")
     
     class Meta:
         indexes = [
             models.Index(fields=['paciente', 'data_upload']),
             models.Index(fields=['tipo_arquivo']),
         ]
+    
+    class Meta:
+        verbose_name = "Documento médico"
+        verbose_name_plural = "Documentos médicos"
+
+    def __str__(self):
+        return self.descrição+self.tipo_arquivo+ " - " + str(self.paciente)[:10]
+
 
 class pesoAltura(models.Model):
     data = models.DateField(
@@ -183,6 +195,9 @@ class pesoAltura(models.Model):
     class Meta:
         verbose_name = "Peso e altura do paciente"
         verbose_name_plural = "Peso e altura dos pacientes"
+    
+    def __str__(self):
+        return str(self.paciente)
 
 class hemogramaCompleto(models.Model):
     data = models.DateField(
@@ -328,6 +343,14 @@ class hemogramaCompleto(models.Model):
     # ---------------------------------------------------------------
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
 
+    class Meta:
+        verbose_name = "Hemograma Completo"
+        verbose_name_plural = "Hemogramas Completos"
+    
+    def __str__(self):
+        return str(self.paciente)
+
+
 class Glicemia(models.Model):
     data = models.DateField(
         null=False,
@@ -360,6 +383,14 @@ class Glicemia(models.Model):
     )
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+
+    class Meta:
+        verbose_name = "Glicemia"
+        verbose_name_plural = "Glicemias"
+
+    def __str__(self):
+        return str(self.paciente)
+
 
 class funcaoRenal(models.Model):
     data = models.DateField(
@@ -454,6 +485,13 @@ class funcaoRenal(models.Model):
     )
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+
+    class Meta:
+        verbose_name = "Função Renal"
+        verbose_name_plural = "Funções Renais"
+    
+    def __str__(self):
+        return str(self.paciente)
 
 class funcaoHepatica(models.Model):
     data = models.DateField(
@@ -551,6 +589,13 @@ class funcaoHepatica(models.Model):
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
 
+    class Meta:
+        verbose_name = "Função Hepática"
+        verbose_name_plural = "Funções Hepáticas"
+    
+    def __str__(self):
+        return str(self.paciente)
+
 class funcaoTireoide(models.Model):
     data = models.DateField(
         null=False,
@@ -640,6 +685,12 @@ class funcaoTireoide(models.Model):
     )
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+    class Meta:
+        verbose_name = "Parâmetros Tireoide"
+        verbose_name_plural = "Parâmetros Tireoides"
+    
+    def __str__(self):
+        return str(self.paciente)
 
 class marcadoresInflamacao(models.Model):
     data = models.DateField(
@@ -674,6 +725,12 @@ class marcadoresInflamacao(models.Model):
     )
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+    class Meta:
+        verbose_name = "Marcadores de Inflamação"
+        verbose_name_plural = "Marcadores de Inflamações"
+    
+    def __str__(self):
+        return str(self.paciente)
 
 class Anemia(models.Model):
     data = models.DateField(
@@ -706,6 +763,13 @@ class Anemia(models.Model):
     )
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+
+    class Meta:
+        verbose_name = "Marcadores de Anemia"
+        verbose_name_plural = "Marcadores de Anemias"
+    
+    def __str__(self):
+        return str(self.paciente)
 
 class Hormonais(models.Model):
     data = models.DateField(
@@ -822,6 +886,12 @@ class Hormonais(models.Model):
     )
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+    class Meta:
+        verbose_name = "Taxa Hormonal"
+        verbose_name_plural = "Taxas Hormonais"
+    
+    def __str__(self):
+        return str(self.paciente)
 
 class DSTs(models.Model):
     data = models.DateField(
@@ -897,6 +967,14 @@ class DSTs(models.Model):
         verbose_name="Gonorreia"
     )
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+    
+    class Meta:
+        verbose_name = "Sorologias de DST"
+        verbose_name_plural = "Sorologias de DSTs"
+    
+    def __str__(self):
+        return str(self.paciente)
+
 
 class Sorologias(models.Model):
     data = models.DateField(
@@ -1003,3 +1081,10 @@ class Sorologias(models.Model):
     )
 
     arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
+
+    class Meta:
+        verbose_name = "Outras Sorologias"
+        verbose_name_plural = "Outras Sorologias"
+    
+    def __str__(self):
+        return str(self.paciente)
