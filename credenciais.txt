@@ -8,7 +8,6 @@ credenciais usuario django
 'USER': 'django_user',
 'PASSWORD': 'Bolodecenoura01!'
 
-
 credenciais admin django
 'user' : 'administrator'
 'pass' : 'grupoPI'
