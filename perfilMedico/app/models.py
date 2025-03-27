@@ -135,6 +135,7 @@ class Paciente(models.Model):
     custom_domain = False"""
 
 # tem bastante coisa pra fazer e melhorar nesse objeto
+# tem que automatizar a obtenção do tipo de arquivo
 class documentoMedico(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name="documentos")
     arquivo = models.FileField(
@@ -905,60 +906,80 @@ class DSTs(models.Model):
     )
 
     hiv = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="HIV"
     )
     
     vdrlOUrpr = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="VDRL/RPR"
     )
 
     ftaabsOUtpha = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="FTA-ABS/TPHA"
     )
 
     hbsag = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="HBsAg"
     )
 
     antihbc = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Anti-HBc"
     )
     
     antihbs = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Anti-HBs"
     )
 
     antihcv = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Anti-HCV"
     )
 
     sorologiaHerpes = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Sorologia Herpes IgC/IgM"
     )
 
     clamidia = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Clamídia"
     )
 
     gonorreia = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Gonorreia"
@@ -987,90 +1008,120 @@ class Sorologias(models.Model):
     )
 
     dengue = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Dengue"
     )
 
     zikaVirus = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Zika Virus"
     )
 
     chikungunya = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Chikungunya"
     )
     
     febreTifoide = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Febre Tifoide"
     )
 
     toxoplasmose = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Toxoplasmose"
     )
 
     rubeola = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Rubeola"
     )
 
     citomegalovirus = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Citomegalovírus"
     )
 
     chagas = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Doença de Chagas"
     )
     
     leptospirose = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Leptospirose"
     )
 
     fatorReumatoide = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Fator Reumatoide"
     )
 
     antiCCP = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Anti-CCP"
     )
     
     anticorpoAntinuclear = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Anticorpo Antinuclear"
     )
     
     antiDNA = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Anti-DNA dupla hélice"
     )
 
     ebv = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Epstein-Barr Vírus"
     )
 
     covid19 = models.BooleanField(
+        null=False,
+        blank=False,
         default=False,
         help_text="reativo?",
         verbose_name="Covid19"
