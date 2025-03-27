@@ -163,7 +163,6 @@ class documentoMedico(models.Model):
     def __str__(self):
         return self.descrição+self.tipo_arquivo+ " - " + str(self.paciente)[:10]
 
-
 class pesoAltura(models.Model):
     data = models.DateField(
         null=False,
@@ -350,7 +349,6 @@ class hemogramaCompleto(models.Model):
     def __str__(self):
         return str(self.paciente)
 
-
 class Glicemia(models.Model):
     data = models.DateField(
         null=False,
@@ -390,7 +388,6 @@ class Glicemia(models.Model):
 
     def __str__(self):
         return str(self.paciente)
-
 
 class funcaoRenal(models.Model):
     data = models.DateField(
@@ -974,7 +971,6 @@ class DSTs(models.Model):
     
     def __str__(self):
         return str(self.paciente)
-
 
 class Sorologias(models.Model):
     data = models.DateField(
