@@ -75,7 +75,19 @@ WSGI_APPLICATION = 'pefilMedico.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Volta da implementação simples com SQlite para prototipagem
 DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # Para Django 3.1+
+        # Se estiver usando Django < 3.1:
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+
+# Implementação do postgreSQL para mais adiante
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'perfilmedico_db',
@@ -84,7 +96,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
-}
+}"""
 
 
 # Password validation
