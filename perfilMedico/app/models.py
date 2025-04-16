@@ -55,6 +55,25 @@ listaTiposSanguineos = [
     ('O-','O-') 
 ]
 
+class CID(models.Model):
+
+    codigo = models.CharField(
+        max_length = 8,
+        unique=True,  
+        help_text="Código da doença",
+        verbose_name="CID"
+    )
+
+    descricao = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Descrição da doença",
+    )
+
+    def __str__(self):
+        return self.descricao
+
+
 # Create your models here.
 class Paciente(models.Model):
 
@@ -121,6 +140,13 @@ class Paciente(models.Model):
         verbose_name="Tipo Sanguíneo"
     )
 
+    cid = models.ForeignKey(
+        CID,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Código CID"
+    )
 
     def __str__(self):
         return self.nome
@@ -1118,3 +1144,53 @@ class Sorologias(models.Model):
     
     def __str__(self):
         return str(self.paciente)
+    
+class Receituario(models.Model):
+
+    data = models.DateField(
+        null=False,
+        blank=False,
+        help_text="Data de emissão receituário",
+        verbose_name="Data"
+    )
+
+    paciente = models.ForeignKey(
+        Paciente,
+        on_delete=models.CASCADE,
+        verbose_name="Paciente"
+    )
+
+    remedio = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True,
+        help_text="Remédio prescrito"
+    )
+
+    cid = models.ForeignKey(
+        CID,
+        on_delete=models.CASCADE,
+        verbose_name="Código da doença"
+    )
+
+    crm = models.CharField(
+        max_length=15,
+        blank=False,
+        verbose_name="CRM do médico"
+    )
+
+    nomeDoMedico = models.CharField(
+        max_length=50,
+        blank=False,
+        verbose_name="Nome do médico"
+    )
+
+    textoReceituario = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name="Texto do receituário"
+    )
+
+    def __str__(self):
+        return str(self.data) + " - " + str(self.paciente) + " - " + str(self.cid)
