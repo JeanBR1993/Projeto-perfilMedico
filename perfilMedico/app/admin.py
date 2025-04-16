@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.forms import RadioSelect
-from .models import Paciente, documentoMedico, pesoAltura, hemogramaCompleto, Glicemia, funcaoRenal, funcaoHepatica, funcaoTireoide, marcadoresInflamacao, Anemia, Hormonais, DSTs, Sorologias, CID, Receituario
+from .models import Paciente, documentoMedico, pesoAltura, hemogramaCompleto, Glicemia, funcaoRenal, funcaoHepatica, funcaoTireoide, marcadoresInflamacao, Anemia, Hormonais, DSTs, Sorologias, CID, Receituario, Remedio
 from django.db import models
 
 class DSTsAdmin(admin.ModelAdmin):
@@ -30,5 +30,6 @@ admin.site.register(DSTs, DSTsAdmin)
 admin.site.register(Sorologias, SorologiaAdmin)
 admin.site.register(CID)
 admin.site.register(Receituario)
+admin.site.register(Remedio)
 
 

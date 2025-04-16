@@ -82,8 +82,8 @@ class Remedio(models.Model):
     )
 
     dosagem = models.DecimalField(
-        max_digits=2,
-        max_length=10,
+        decimal_places=2,
+        max_digits=10,
         blank=False,
         null=False,
         verbose_name="Dosagem"
@@ -1179,7 +1179,9 @@ class Receituario(models.Model):
     remedio = models.ForeignKey(
         Remedio,
         on_delete=models.CASCADE,
-        verbose_name="Remedio"
+        verbose_name="Remedio",
+        blank=True,
+        default=None
     )
 
     cid = models.ForeignKey(
