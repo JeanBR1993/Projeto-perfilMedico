@@ -73,6 +73,22 @@ class CID(models.Model):
     def __str__(self):
         return self.descricao
 
+class Remedio(models.Model):
+    compostoAtivo = models.CharField(
+        max_length = 50,
+        blank=False,
+        null=False,
+        verbose_name="Composto ativo"
+    )
+
+    dosagem = models.DecimalField(
+        max_digits=2,
+        max_length=10,
+        blank=False,
+        null=False,
+        verbose_name="Dosagem"
+    )
+
 
 # Create your models here.
 class Paciente(models.Model):
@@ -1160,11 +1176,10 @@ class Receituario(models.Model):
         verbose_name="Paciente"
     )
 
-    remedio = models.CharField(
-        max_length=30,
-        blank=True,
-        null=True,
-        help_text="Remédio prescrito"
+    remedio = models.ForeignKey(
+        Remedio,
+        on_delete=models.CASCADE,
+        verbose_name="Remedio"
     )
 
     cid = models.ForeignKey(
@@ -1189,7 +1204,7 @@ class Receituario(models.Model):
         max_length=200,
         blank=True,
         null=True,
-        verbose_name="Texto do receituário"
+        verbose_name="Texto do receituário, período de tratamento, sugestão de uso"
     )
 
     def __str__(self):
