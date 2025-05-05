@@ -58,6 +58,9 @@ fatorRH = [
 
 class Vacina(models.Model):
     nomeVacina = models.CharField(max_length=150)
+    class Meta:
+        verbose_name = "Vacinas homologadas"
+        verbose_name_plural = "Vacinas homologadas"
 
 class CID(models.Model):
 
@@ -875,9 +878,13 @@ class Vacinas(models.Model):
     data_aplicacao = models.DateField(
         null=False,
         blank=False,
-        help_text="Data de obtenção dos dados",
+        help_text="Data de aplicação",
         verbose_name="Data"
     )
+
+    class Meta:
+        verbose_name = "Vacinas tomadas por paciente"
+        verbose_name_plural = "Vacinas tomadas por paciente"
 
 class Medicamento(models.Model):
     nome = models.CharField(max_length=200, blank=False, null=False)
@@ -898,7 +905,7 @@ class Receituario(models.Model):
     prontuario = models.ForeignKey(Prontuario, on_delete=models.CASCADE)
     medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
     data = models.DateField(auto_now_add=True, null=False,blank=False)
-    verbose_name="Data"
+    verbose_name="Receituário"
 
 class MedicamentoReceitado(models.Model):
     receituario = models.ForeignKey(Receituario, on_delete=models.CASCADE)
