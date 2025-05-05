@@ -883,8 +883,8 @@ class Vacinas(models.Model):
     )
 
     class Meta:
-        verbose_name = "Vacinas tomadas por paciente"
-        verbose_name_plural = "Vacinas tomadas por paciente"
+        verbose_name = "Carteirinha de vacinas por paciente"
+        verbose_name_plural = "Carteirinha de vacinas por paciente"
 
 class Medicamento(models.Model):
     nome = models.CharField(max_length=200, blank=False, null=False)
