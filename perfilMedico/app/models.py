@@ -45,15 +45,19 @@ listaGenerosNascimento = [
 ]
 
 listaTiposSanguineos = [
-    ('A+','A+'), 
-    ('A-','A-'),
-    ('B+','B+'), 
-    ('B-','B-'),
-    ('AB+','AB+'), 
-    ('AB-','AB-'),
-    ('O+','O+'),
-    ('O-','O-') 
+    ('A','A'), 
+    ('B','B'), 
+    ('AB','AB'), 
+    ('O','O')
 ]
+
+fatorRH = [
+    ("+","+"),
+    ("-", "-")
+]
+
+class Vacina(models.Model):
+    nomeVacina = models.CharField(max_length=150)
 
 class CID(models.Model):
 
@@ -70,29 +74,16 @@ class CID(models.Model):
         help_text="Descrição da doença",
     )
 
-    def __str__(self):
-        return self.descricao
-
-class Remedio(models.Model):
-    compostoAtivo = models.CharField(
-        max_length = 50,
+class FichaCadastral(models.Model):
+    nome_completo = models.CharField(max_length=200, blank=False, null=False)
+    
+    data_nascimento = models.DateField(
         blank=False,
-        null=False,
-        verbose_name="Composto ativo"
+        validators=[validadorDataNascimento],
+        verbose_name="Data de Nascimento",
+        help_text="Data de nascimento no formato DD/MM/AAAA"
     )
-
-    dosagem = models.DecimalField(
-        decimal_places=2,
-        max_digits=10,
-        blank=False,
-        null=False,
-        verbose_name="Dosagem"
-    )
-
-
-# Create your models here.
-class Paciente(models.Model):
-
+    
     cpf = models.CharField(
         max_length=11,
         unique=True,
@@ -101,19 +92,14 @@ class Paciente(models.Model):
         verbose_name="CPF"
     )
 
-    numeroSUS = models.PositiveIntegerField(
-        unique=True,
-        help_text="Somente números",
-        verbose_name="Número do SUS"
-    )
+    cns = models.IntegerField(unique=True, blank=False, null=False)
 
-    nome = models.CharField(
+    endereco = models.CharField(
         max_length=100,
-        blank=False,
-        validators=[MinLengthValidator(5)],
-        verbose_name="Nome completo"
+        blank = False,
+        verbose_name="Endereço de residência"
     )
-
+    
     cep = models.CharField(
         max_length=8,
         validators=[RegexValidator(regex=r'\d{8}$', message='Número de CEP ter apenas números e 8 deles.', code='cep_invalido')],
@@ -122,126 +108,60 @@ class Paciente(models.Model):
         verbose_name="CEP"
     )
 
-    endereço = models.CharField(
-        max_length=100,
-        blank = False,
-        verbose_name="Endereço de residência"
-    )
+    def __str__(self):
+        return self.nome_completo
 
-    dataNascimento = models.DateField(
-        blank=False,
-        validators=[validadorDataNascimento],
-        verbose_name="Data de Nascimento",
-        help_text="Data de nascimento no formato DD/MM/AAAA"
-    )
+class Prontuario(models.Model):
 
-    generoNascimento = models.CharField(
-        max_length=1,
-        choices=listaGenerosNascimento,
-        default="H",
-        blank=False,
-        verbose_name="Gênero de Nascimento"
-    )
-
-    generoIdentificação = models.CharField(
-        max_length=20,
-        blank = True,
-        verbose_name="Gênero de Identificação"
-    )
-
-    tipoSanguineo = models.CharField(
+    paciente = models.OneToOneField(FichaCadastral, on_delete=models.CASCADE)
+    
+    tipo_sanguineo = models.CharField(
         max_length=3,
         choices=listaTiposSanguineos,
         blank=False,
         verbose_name="Tipo Sanguíneo"
     )
 
-    cid = models.ForeignKey(
-        CID,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name="Código CID"
+    fator_rh = models.CharField(
+        max_length=3,
+        choices=fatorRH,
+        blank=False,
+        verbose_name="Fator RH"
     )
 
-    def __str__(self):
-        return self.nome
-
-# classes de implementação dos arquivos de documento médico,
-# falta a tomada de decisão por qual serviço de hospedagem,
-# se Amazon S3, Microsoft Azure e etc...
-"""class PrivateMedicalStorage():
-    location = 'private'
-    default_acl = 'private'
-    file_overwrite = False
-    custom_domain = False"""
-
-# tem bastante coisa pra fazer e melhorar nesse objeto
-# tem que automatizar a obtenção do tipo de arquivo
-class documentoMedico(models.Model):
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name="documentos")
-    arquivo = models.FileField(
-        upload_to='uploads/',
-        validators=[FileExtensionValidator(allowed_extensions=["pdf", "jpeg"])],
-        help_text="Aceita apenas PDF e JPEG"
+    doador = models.BooleanField(
+        null=False,
+        blank=False,
+        verbose_name="Doador de Orgãos?"
     )
-    descrição = models.CharField(max_length=255)
-    data_upload = models.DateTimeField(auto_now_add=True)
-    tipo_arquivo = models.CharField(max_length=10)  # 'pdf', 'jpeg', etc.
-    
-    # Additional medical metadata
-    tipoDocumento = models.CharField(max_length=50, verbose_name="Tipo de documento", blank=True, null=True)  # 'xray', 'lab_report', etc.
-    anotacaoMedico = models.TextField(blank=True, verbose_name="Anotação do Médico")
-    
-    class Meta:
-        indexes = [
-            models.Index(fields=['paciente', 'data_upload']),
-            models.Index(fields=['tipo_arquivo']),
-        ]
-    
-    class Meta:
-        verbose_name = "Documento médico"
-        verbose_name_plural = "Documentos médicos"
 
-    def __str__(self):
-        return self.descrição+self.tipo_arquivo+ " - " + str(self.paciente)[:10]
+    histocompatibilidade = models.TextField(max_length=100,blank=True, null=True)
 
-class pesoAltura(models.Model):
+class HistoricoPesoAltura(models.Model):
+    paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE)
+    
     data = models.DateField(
         null=False,
         blank=False,
         help_text="Data de obtenção dos dados",
         verbose_name="Data"
     )
-    
     peso = models.DecimalField(
         max_digits=4,
         decimal_places=1,
-        validators=[MinValueValidator(0), MaxValueValidator(400.0)],
+        validators=[MinValueValidator(0), MaxValueValidator(700)],
         blank=False,
         help_text="Em kilogramas"
     )
-
     altura = models.IntegerField(
         blank=False,
         validators=[MinValueValidator(20), MaxValueValidator(280)],
         help_text="Em centímetros"
     )
 
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
-
-    class Meta:
-        verbose_name = "Peso e altura do paciente"
-        verbose_name_plural = "Peso e altura dos pacientes"
+class ExameLaboratorial(models.Model):
+    paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE)
     
-    def __str__(self):
-        return str(self.paciente)
-
-class hemogramaCompleto(models.Model):
     data = models.DateField(
         null=False,
         blank=False,
@@ -249,13 +169,7 @@ class hemogramaCompleto(models.Model):
         verbose_name="Data"
     )
 
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
-
-# Série Vermelha
+    # Série Vermelha
     hemoglobina = models.DecimalField(
         max_digits=3,
         decimal_places=1,
@@ -383,28 +297,6 @@ class hemogramaCompleto(models.Model):
     )
 
     # ---------------------------------------------------------------
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-
-    class Meta:
-        verbose_name = "Hemograma Completo"
-        verbose_name_plural = "Hemogramas Completos"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class Glicemia(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
 
     glicemiaJejum = models.PositiveSmallIntegerField(
         blank=True,
@@ -422,29 +314,6 @@ class Glicemia(models.Model):
         verbose_name = "Hemoglobina Glicada (HbA1c)",
         null=True
     )
-
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-
-    class Meta:
-        verbose_name = "Glicemia"
-        verbose_name_plural = "Glicemias"
-
-    def __str__(self):
-        return str(self.paciente)
-
-class funcaoRenal(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )    
 
     creatinina = models.DecimalField(
         max_digits=3,
@@ -524,28 +393,6 @@ class funcaoRenal(models.Model):
         null=True
     )
 
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-
-    class Meta:
-        verbose_name = "Função Renal"
-        verbose_name_plural = "Funções Renais"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class funcaoHepatica(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
 
     alt = models.SmallIntegerField(
         null=True,
@@ -627,29 +474,6 @@ class funcaoHepatica(models.Model):
         verbose_name="Desidrogenase Láctica (LDH)"
     )
 
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-
-    class Meta:
-        verbose_name = "Função Hepática"
-        verbose_name_plural = "Funções Hepáticas"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class funcaoTireoide(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
-
     tsh = models.DecimalField(
         decimal_places=1,
         max_digits=3,
@@ -724,28 +548,6 @@ class funcaoTireoide(models.Model):
         verbose_name="Anticorpo Antirreceptor de TSH (TRAb)"
     )
 
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-    class Meta:
-        verbose_name = "Parâmetros Tireoide"
-        verbose_name_plural = "Parâmetros Tireoides"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class marcadoresInflamacao(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
-
     pcr = models.DecimalField(
         decimal_places=1,
         max_digits=3,
@@ -764,27 +566,6 @@ class marcadoresInflamacao(models.Model):
         verbose_name="Velocidade de Hemossedimentação (VHS)"
     )
 
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-    class Meta:
-        verbose_name = "Marcadores de Inflamação"
-        verbose_name_plural = "Marcadores de Inflamações"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class Anemia(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-    
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
 
     ferritinina = models.SmallIntegerField(
         null=True,
@@ -802,28 +583,6 @@ class Anemia(models.Model):
         verbose_name="Ferro Sérico"
     )
 
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-
-    class Meta:
-        verbose_name = "Marcadores de Anemia"
-        verbose_name_plural = "Marcadores de Anemias"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class Hormonais(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
 
     estradiol = models.SmallIntegerField(
         null=True,
@@ -925,28 +684,6 @@ class Hormonais(models.Model):
         verbose_name="Hormônio do Crescimento (GH)"
     )
 
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-    class Meta:
-        verbose_name = "Taxa Hormonal"
-        verbose_name_plural = "Taxas Hormonais"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class DSTs(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
-
     hiv = models.BooleanField(
         null=True,
         blank=True,
@@ -1024,29 +761,7 @@ class DSTs(models.Model):
         help_text="reativo?",
         verbose_name="Gonorreia"
     )
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
     
-    class Meta:
-        verbose_name = "Sorologias de DST"
-        verbose_name_plural = "Sorologias de DSTs"
-    
-    def __str__(self):
-        return str(self.paciente)
-
-class Sorologias(models.Model):
-    data = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de obtenção dos dados",
-        verbose_name="Data"
-    )
-
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
-
     dengue = models.BooleanField(
         null=True,
         blank=True,
@@ -1152,62 +867,87 @@ class Sorologias(models.Model):
         verbose_name="Covid19"
     )
 
-    arquivoExame = models.ForeignKey(documentoMedico, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Arquivo do exame")
-
-    class Meta:
-        verbose_name = "Outras Sorologias"
-        verbose_name_plural = "Outras Sorologias"
+    cid = models.ManyToManyField(CID, related_name="CIDs")
     
-    def __str__(self):
-        return str(self.paciente)
-    
-class Receituario(models.Model):
-
-    data = models.DateField(
+class Vacinas(models.Model):
+    paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE),
+    vacina = models.ManyToManyField(Vacina, related_name="Vacinas"),
+    data_aplicacao = models.DateField(
         null=False,
         blank=False,
-        help_text="Data de emissão receituário",
+        help_text="Data de obtenção dos dados",
         verbose_name="Data"
     )
 
-    paciente = models.ForeignKey(
-        Paciente,
-        on_delete=models.CASCADE,
-        verbose_name="Paciente"
-    )
-
-    remedio = models.ForeignKey(
-        Remedio,
-        on_delete=models.CASCADE,
-        verbose_name="Remedio",
-        blank=True,
-        default=None
-    )
-
-    cid = models.ForeignKey(
-        CID,
-        on_delete=models.CASCADE,
-        verbose_name="Código da doença"
-    )
-
-    crm = models.CharField(
-        max_length=15,
-        blank=False,
-        verbose_name="CRM do médico"
-    )
-
-    nomeDoMedico = models.CharField(
-        max_length=50,
-        blank=False,
-        verbose_name="Nome do médico"
-    )
-
-    textoReceituario = models.CharField(
-        max_length=200,
-        blank=True,
-        null=True,
-        verbose_name="Texto do receituário, período de tratamento, sugestão de uso"
-    )
+class Medicamento(models.Model):
+    nome = models.CharField(max_length=200, blank=False, null=False)
+    anvisa_codigo = models.CharField(max_length=20, blank=False, null=False)
 
     def __str__(self):
-        return str(self.data) + " - " + str(self.paciente) + " - " + str(self.cid)
+        return self.nome
+
+class Medico(models.Model):
+    nome = models.CharField(max_length=200, unique=True)
+    crm = models.CharField(max_length=10, unique=True)
+    ativo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.nome
+
+class Receituario(models.Model):
+    prontuario = models.ForeignKey(Prontuario, on_delete=models.CASCADE)
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
+    data = models.DateField(auto_now_add=True, null=False,blank=False)
+    verbose_name="Data"
+
+class MedicamentoReceitado(models.Model):
+    receituario = models.ForeignKey(Receituario, on_delete=models.CASCADE)
+    medicamento = models.ForeignKey(Medicamento, on_delete=models.CASCADE)
+    dosagem = models.CharField(max_length=20)
+    frequencia = models.CharField(max_length=20)
+    observacao = models.CharField(max_length=100)
+
+
+
+
+# classes de implementação dos arquivos de documento médico,
+# falta a tomada de decisão por qual serviço de hospedagem,
+# se Amazon S3, Microsoft Azure e etc...
+"""class PrivateMedicalStorage():
+    location = 'private'
+    default_acl = 'private'
+    file_overwrite = False
+    custom_domain = False"""
+
+# tem bastante coisa pra fazer e melhorar nesse objeto
+# tem que automatizar a obtenção do tipo de arquivo
+"""class documentoMedico(models.Model):
+    paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE, related_name="documentos")
+    arquivo = models.FileField(
+        upload_to='uploads/',
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "jpeg"])],
+        help_text="Aceita apenas PDF e JPEG"
+    )
+    descrição = models.CharField(max_length=255)
+    data_upload = models.DateTimeField(auto_now_add=True)
+    tipo_arquivo = models.CharField(max_length=10)  # 'pdf', 'jpeg', etc.
+    
+    # Additional medical metadata
+    tipoDocumento = models.CharField(max_length=50, verbose_name="Tipo de documento", blank=True, null=True)  # 'xray', 'lab_report', etc.
+    anotacaoMedico = models.TextField(blank=True, verbose_name="Anotação do Médico")
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['FichaCadastral', 'data_upload']),
+            models.Index(fields=['tipo_arquivo']),
+        ]
+    
+    class Meta:
+        verbose_name = "Documento médico"
+        verbose_name_plural = "Documentos médicos"
+
+    def __str__(self):
+        return self.descrição+self.tipo_arquivo+ " - " + str(self.paciente)[:10]
+
+
+"""
