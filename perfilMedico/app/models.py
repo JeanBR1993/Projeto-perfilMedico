@@ -62,6 +62,9 @@ class Vacina(models.Model):
         verbose_name = "Vacinas homologadas"
         verbose_name_plural = "Vacinas homologadas"
 
+    def __str__(self):
+        return self.nomeVacina
+
 class CID(models.Model):
 
     codigo = models.CharField(
@@ -72,10 +75,12 @@ class CID(models.Model):
     )
 
     descricao = models.CharField(
-        max_length=50,
-        unique=True,
+        max_length=250,
         help_text="Descrição da doença",
     )
+
+    def __str__(self):
+        return str(self.codigo) + " - " + str(self.descricao)
 
 class FichaCadastral(models.Model):
     nome_completo = models.CharField(max_length=200, blank=False, null=False)
@@ -140,6 +145,9 @@ class Prontuario(models.Model):
 
     histocompatibilidade = models.TextField(max_length=100,blank=True, null=True)
 
+    def __str__(self):
+        return self.paciente
+
 class HistoricoPesoAltura(models.Model):
     paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE)
     
@@ -161,6 +169,9 @@ class HistoricoPesoAltura(models.Model):
         validators=[MinValueValidator(20), MaxValueValidator(280)],
         help_text="Em centímetros"
     )
+
+    def __str__(self):
+        return self.paciente
 
 class ExameLaboratorial(models.Model):
     paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE)
@@ -871,6 +882,9 @@ class ExameLaboratorial(models.Model):
     )
 
     cid = models.ManyToManyField(CID, related_name="CIDs")
+
+    def __str__(self):
+        return self.paciente
     
 class Vacinas(models.Model):
     paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE),
@@ -885,6 +899,9 @@ class Vacinas(models.Model):
     class Meta:
         verbose_name = "Carteirinha de vacinas por paciente"
         verbose_name_plural = "Carteirinha de vacinas por paciente"
+    
+    def __str__(self):
+        return self.paciente
 
 class Medicamento(models.Model):
     nome = models.CharField(max_length=200, blank=False, null=False)
@@ -906,6 +923,8 @@ class Receituario(models.Model):
     medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
     data = models.DateField(auto_now_add=True, null=False,blank=False)
     verbose_name="Receituário"
+    def __str__(self):
+        return self.prontuario
 
 class MedicamentoReceitado(models.Model):
     receituario = models.ForeignKey(Receituario, on_delete=models.CASCADE)
@@ -913,6 +932,9 @@ class MedicamentoReceitado(models.Model):
     dosagem = models.CharField(max_length=20)
     frequencia = models.CharField(max_length=20)
     observacao = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.receituario
 
 
 
