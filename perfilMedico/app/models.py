@@ -146,7 +146,7 @@ class Prontuario(models.Model):
     histocompatibilidade = models.TextField(max_length=100,blank=True, null=True)
 
     def __str__(self):
-        return self.paciente
+        return self.paciente.nome_completo
 
 class HistoricoPesoAltura(models.Model):
     paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE)
@@ -171,7 +171,7 @@ class HistoricoPesoAltura(models.Model):
     )
 
     def __str__(self):
-        return self.paciente
+        return self.paciente.nome_completo
 
 class ExameLaboratorial(models.Model):
     paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE)
@@ -884,24 +884,26 @@ class ExameLaboratorial(models.Model):
     cid = models.ManyToManyField(CID, related_name="CIDs")
 
     def __str__(self):
-        return self.paciente
+        return self.paciente.nome_completo
     
-class Vacinas(models.Model):
-    paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE),
-    vacina = models.ManyToManyField(Vacina, related_name="Vacinas"),
-    data_aplicacao = models.DateField(
-        null=False,
-        blank=False,
-        help_text="Data de aplicação",
-        verbose_name="Data"
-    )
-
+class RegistroVacinacao(models.Model):
+    paciente = models.ForeignKey(FichaCadastral, on_delete=models.CASCADE, related_name='vacinas')
+    vacina = models.ForeignKey(Vacina, on_delete=models.PROTECT)
+    data_aplicacao = models.DateTimeField(default=timezone.now)
+    dose = models.PositiveSmallIntegerField(default=1)
+    lote_aplicado = models.CharField(max_length=50, blank=True, null=True)
+    local_aplicacao = models.CharField(max_length=100, blank=True, null=True)
+    profissional = models.CharField(max_length=100, blank=True, null=True)
+    observacoes = models.TextField(blank=True, null=True)
+    
     class Meta:
-        verbose_name = "Carteirinha de vacinas por paciente"
-        verbose_name_plural = "Carteirinha de vacinas por paciente"
+        verbose_name = "Registro de Vacinação"
+        verbose_name_plural = "Registros de Vacinação"
+        # Garantir que não haja duplicação de registros para a mesma vacina/dose/paciente
+        unique_together = ['paciente', 'vacina', 'dose']
     
     def __str__(self):
-        return self.paciente
+        return f"{self.paciente.nome_completo} - {self.vacina.nomeVacina} (Dose {self.dose})"
 
 class Medicamento(models.Model):
     nome = models.CharField(max_length=200, blank=False, null=False)
