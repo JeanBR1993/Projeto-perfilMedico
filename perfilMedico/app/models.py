@@ -116,6 +116,11 @@ class FichaCadastral(models.Model):
         verbose_name="CEP"
     )
 
+    class Meta:
+        verbose_name = "Ficha cadastral"
+        verbose_name_plural = "Fichas cadastrais"
+
+
     def __str__(self):
         return self.nome_completo
 
@@ -883,6 +888,10 @@ class ExameLaboratorial(models.Model):
 
     cid = models.ManyToManyField(CID, related_name="CIDs")
 
+    class Meta:
+        verbose_name = "Exame Laboratorial"
+        verbose_name_plural = "Exame Laboratoriais"
+
     def __str__(self):
         return self.paciente.nome_completo
     
@@ -931,7 +940,6 @@ class Receituario(models.Model):
 class MedicamentoReceitado(models.Model):
     receituario = models.ForeignKey(Receituario, on_delete=models.CASCADE)
     medicamento = models.ForeignKey(Medicamento, on_delete=models.CASCADE)
-    dosagem = models.CharField(max_length=20)
     frequencia = models.CharField(max_length=20)
     observacao = models.CharField(max_length=100)
 
