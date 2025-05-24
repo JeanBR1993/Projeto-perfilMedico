@@ -890,7 +890,7 @@ class ExameLaboratorial(models.Model):
 
     class Meta:
         verbose_name = "Exame Laboratorial"
-        verbose_name_plural = "Exame Laboratoriais"
+        verbose_name_plural = "Exames Laboratoriais"
 
     def __str__(self):
         return self.paciente.nome_completo
